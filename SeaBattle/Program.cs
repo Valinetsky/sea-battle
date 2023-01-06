@@ -1,15 +1,16 @@
-﻿int DIRECTIONS = 4;
+﻿// Количество направлений, по которым может располагаться корабль 1 - от головы на север, далее - по часовой стрелке.
+int DIRECTIONS = 4;
 
 // Размер массива игрового поля - 10х10 и ограничение края единицами. Итоговый размер 12х12.
 int[,] computerWorld = new int[12, 12];
 
+// Массив кораблей. 
 int[][] squadron = {
 	new int[] {0, 0, 0, 4, 0},
 	new int[] {0, 0, 0, 3, 0}, new int[] {0, 0, 0, 3, 0},
 	new int[] {0, 0, 0, 2, 0}, new int[] {0, 0, 0, 2, 0}, new int[] {0, 0, 0, 2, 0},
-	new int[] {0, 0, 0, 1, 0}, new int[] {0, 0, 0, 1, 0}, new int[] {0, 0, 0, 1, 0}, new int[] {0, 0, 0, 1, 0}
+	new int[] {0, 0, 1, 1, 0}, new int[] {0, 0, 1, 1, 0}, new int[] {0, 0, 1, 1, 0}, new int[] {0, 0, 1, 1, 0}
 };
-
 
 array2dBorder(computerWorld);
 // array2dToScreen(computerWorld);
@@ -19,47 +20,26 @@ Array.Copy(computerWorld, stageStart, computerWorld.Length);
 
 System.Console.WriteLine("Empty cell in array:");
 System.Console.WriteLine(countEmptyCells(stageStart));
-Console.Clear();
-
-
+// Console.Clear();
 
 foreach (int[] element in squadron)
 {
-    System.Console.WriteLine("888888888888");
 	Console.WriteLine("Массив: [ " + string.Join(" | ", element) + " ]");
 
 	ShipPlace(element, stageStart);
 	FillCellsAroundShip(element, stageStart);
 }
 
-// // ---------------- Old-style place ship and output
-// foreach (int[] element in squadron)
-// {
-//     System.Console.WriteLine("888888888888");
-// 	Console.WriteLine("Массив: [ " + string.Join(" | ", element) + " ]");
-
-// 	shipOnMap(element, stageStart);
-// 	FillCellsAroundShip(element, stageStart);
-// }
-
-// foreach (int[] element in squadron)
-// {
-//     System.Console.WriteLine("77777777777777777777777777777777777");
-// 	Console.WriteLine("Массив: [ " + string.Join(" | ", element) + " ]");
-// }
-
-
-
-
 // --------------------------- new-style SHIP PLACE
 void ShipPlace(int[] ship, int[,] map)
 {
+	int decks = ship[3];
 	int[,] mapLocal = new int[12, 12];
-	
+
 	Array.Copy(map, mapLocal, map.Length);
 	int emptyCells = countEmptyCells(mapLocal);
 
-	while (emptyCells > 0)
+	while (emptyCells >= decks)
 	{
 		int sucsess = -1;
 
@@ -70,40 +50,38 @@ void ShipPlace(int[] ship, int[,] map)
 		int localX = xAnDy / 100;
 		int localY = xAnDy % 100;
 
-		int decks = ship[3];
-
 		int[] directionArray = new int[DIRECTIONS];
 		arrayUniqFill(directionArray);
-
-		System.Console.WriteLine("DIRECTIONS");
-		System.Console.WriteLine(DIRECTIONS);
 
 		for (int i = 1; i <= DIRECTIONS; i++)
 		{
 			int[] dXdYupperLevel = GetDirection(directionArray[i - 1]);
-			
+
 			// получаем приращение координат от головы корабля
 			int dXupperLevel = dXdYupperLevel[0];
 			int dYupperLevel = dXdYupperLevel[1];
 
 			for (int j = 1; j < decks; j++)
 			{
-				System.Console.WriteLine($"Point X: {localX + dXupperLevel * j}. Point Y: {localY + dYupperLevel * j} ");
+				// System.Console.WriteLine($"Point X: {localX + dXupperLevel * j}. Point Y: {localY + dYupperLevel * j} ");
 
-				if (mapLocal[localY + dYupperLevel * j, localX + dXupperLevel * j] != 0)
+				if (decks > 1)
 				{
-					System.Console.WriteLine("BREAK!!!");
+					if (mapLocal[localY + dYupperLevel * j, localX + dXupperLevel * j] != 0)
+					{
+						System.Console.WriteLine("BREAK!!!");
 
-					mapLocal[localY, localX] = 1;
-					emptyCells--;
+						mapLocal[localY, localX] = 1;
+						emptyCells--;
 
-					sucsess = 0;
-					
-					break;
+						sucsess = 0;
+
+						break;
+					}
 				}
-				
+
 				mapLocal[localY + dYupperLevel * j, localX + dXupperLevel * j] = 6;
-				
+
 			}
 
 			if (sucsess == 0)
@@ -115,7 +93,7 @@ void ShipPlace(int[] ship, int[,] map)
 			ship[0] = localX;
 			ship[1] = localY;
 			ship[2] = directionArray[i - 1];
-			
+
 			// ------- not used ever
 			ship[4] = 1;
 			System.Console.WriteLine("localX");
@@ -123,25 +101,14 @@ void ShipPlace(int[] ship, int[,] map)
 			System.Console.WriteLine("localY");
 			System.Console.WriteLine(localY);
 
-
 			array2dToScreen(mapLocal);
 			return;
 
 		}
 
-		
+
 	}
 }
-	
-
-	
-
-
-	
-
-	
-
-
 
 // --------------------------- fill cell around ship
 void FillCellsAroundShip(int[] ship, int[,] map)
@@ -152,10 +119,6 @@ void FillCellsAroundShip(int[] ship, int[,] map)
 	int[] dXdY = GetDirection(ship[2]);
 	int dX = dXdY[0];
 	int dY = dXdY[1];
-	System.Console.WriteLine("dX");
-	System.Console.WriteLine(dX);
-	System.Console.WriteLine("dY");
-	System.Console.WriteLine(dY);
 
 	for (int decks = 1; decks <= ship[3]; decks++)
 	{
@@ -164,7 +127,7 @@ void FillCellsAroundShip(int[] ship, int[,] map)
 			for (int j = headDeckY - 1; j <= headDeckY + 1; j++)
 			{
 				// j - Y, i - X
-				map[j,i] = 1;
+				map[j, i] = 1;
 			}
 		}
 		headDeckX = headDeckX + dX;
@@ -172,105 +135,6 @@ void FillCellsAroundShip(int[] ship, int[,] map)
 	}
 	array2dToScreen(map);
 }
-
-// System.Console.WriteLine(shipOnMap(squadron[0], stageStart));
-
-// System.Console.WriteLine("++++++++++++++++++++++++++");
-// array2dToScreen(stageStart);
-
-// // ---------------- Trying place ship on map ---------
-// int shipOnMap(int[] arrShip, int[,] arrMap)
-// {
-// 	int[,] arrLocalMap = new int[12, 12];
-// 	Array.Copy(arrMap, arrLocalMap, arrMap.Length);
-
-// 	int sucsess = -1;
-
-// 	int decks = arrShip[3];
-// 	int emptyCells = countEmptyCells(arrLocalMap);
-
-// 	if (emptyCells < decks)
-// 	{
-// 		sucsess = 0;
-// 		return sucsess;
-// 	}
-
-	
-// 	int randomCell = GetRandomFrom(1, emptyCells + 1);
-
-// 	// получаем координаты X и Y выбранной выше случайной ячейки
-// 	int xAnDy = randomCellXY(randomCell, arrMap);
-
-// 	int newX = xAnDy / 100;
-// 	int newY = xAnDy % 100;
-
-// 	System.Console.WriteLine("xAnDy");
-// 	System.Console.WriteLine(xAnDy);
-// 	System.Console.WriteLine("--------");
-
-// 	System.Console.WriteLine(decks);
-// 	System.Console.Write(newX);
-// 	System.Console.Write(" ");
-// 	System.Console.Write(newY);
-// 	System.Console.WriteLine();
-
-// 	// Успешно помещаем голову корабля в пустую клетку.
-// 	arrLocalMap[newY, newX] = 7;
-
-// 	// создаем массив случайных направлений
-// 	int[] probeArray = new int[DIRECTIONS];
-// 	arrayUniqFill(probeArray);
-
-// 	for (int i = 1; i <= DIRECTIONS; i++)
-// 	{
-// 		System.Console.Write("...... ");
-// 		System.Console.Write(i);
-// 		System.Console.Write(" .....");
-// 		System.Console.WriteLine();
-
-// 		int[] dXdYupperLevel = GetDirection(probeArray[i - 1]);
-// 		System.Console.Write("Direction: ");
-// 		System.Console.Write(probeArray[i - 1]);
-// 		System.Console.WriteLine();
-
-// 		// получаем приращение координат от головы корабля
-// 		int dXupperLevel = dXdYupperLevel[0];
-// 		int dYupperLevel = dXdYupperLevel[1];
-
-// 		for (int j = 1; j < decks; j++)
-// 		{
-// 			// System.Console.Write("Point: ");
-// 			// System.Console.WriteLine(arrMap[newY + dYupperLevel * j, newX + dXupperLevel * j]);
-// 			System.Console.WriteLine($"Point X: {newX + dXupperLevel * j}. Point Y: {newY + dYupperLevel * j} ");
-
-// 			if (arrLocalMap[newY + dYupperLevel * j, newX + dXupperLevel * j] != 0)
-// 			{
-// 				System.Console.WriteLine("BREAK!!!");
-// 				Array.Copy(arrMap, arrLocalMap, arrMap.Length);
-// 				arrLocalMap[newY, newX] = 7;
-// 				sucsess = 0;
-// 				break;
-// 			}
-// 			sucsess = 1;
-// 			arrLocalMap[newY + dYupperLevel * j, newX + dXupperLevel * j] = 6;
-// 			arrShip[0] = newX;
-// 			arrShip[1] = newY;
-// 			arrShip[2] = probeArray[i - 1];
-// 		}
-
-// 		if (sucsess == 0)
-// 		{
-// 			continue;
-// 		}
-// 		break;
-// 	}
-// 	if (sucsess == 1)
-// 	{
-// 		array2dToScreen(arrLocalMap);
-// 	}
-// 	return sucsess;
-// }
-
 
 // ------------ Get direction -----------
 int[] GetDirection(int number)
@@ -377,6 +241,7 @@ void array2dToScreen(int[,] arr2d)
 		}
 		System.Console.WriteLine();
 	}
+	System.Console.WriteLine();
 }
 
 // ------------------- fill ARRAY
@@ -386,8 +251,8 @@ int[] arrayFill(int[] arr, int left, int right)
 	{
 		arr[i] = GetRandomFrom(left, right);
 	}
-	System.Console.WriteLine("=====================");
-	Console.WriteLine("Массив: [ " + string.Join(" | ", arr) + " ]");
+	// System.Console.WriteLine("=====================");
+	// Console.WriteLine("Массив: [ " + string.Join(" | ", arr) + " ]");
 
 	return arr;
 }

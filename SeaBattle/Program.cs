@@ -282,7 +282,7 @@ void array2dToScreen(int[,] arr2d)
 	System.Console.WriteLine();
 }
 
-// ------------------- fill ARRAY
+// ------------------- fill ARRAY random numbers [left, right] 
 int[] arrayFill(int[] arr, int left, int right)
 {
 	for (int i = 0; i < arr.Length; i++)
@@ -293,7 +293,7 @@ int[] arrayFill(int[] arr, int left, int right)
 	return arr;
 }
 
-// ------------------ fill Arr with unique numbers
+// ------------------ fill Arr with unique numbers from 1 to array.lenght
 void arrayUniqFill(int[] arr)
 {
 	int tempRandom;
@@ -321,3 +321,15 @@ int GetRandomFrom(int bottom, int top)
 	int result = rnd.Next(bottom, top + 1);
 	return result;
 }
+
+// ------------ Continue from here
+// // --------------------- Board to screen
+// void array2dGraphToScreen(int[,] arr2d, int[] squadron)
+// {
+// 	foreach (int[] element in squadron)
+// 	{
+// 		ShipPlace(element, stageStart);
+// 		FillCellsAroundShip(element, stageStart);
+// 	}
+// 	System.Console.WriteLine("All ships placed on map");
+// }

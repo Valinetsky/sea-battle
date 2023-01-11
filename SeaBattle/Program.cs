@@ -8,7 +8,9 @@ int FILLNUMBER = 8;
 // Не очень хороший пример для тестирования, но должен срабатывать вплоть до помещения всех однопалубных кораблей.
 // В итеративном прогоне от четырехпалубника до последнего однопалубника на изначатьно пустом поле, матрица заполнения, не позволяющая встать кораблям ближе,
 // чем возможно по правилам игры, равна 3 х (decks + 2). Она не даст хвосту следующего по списку корабля встать на невозможное место. 
-int[,] computerWorld = new int[12, 12]
+int WORLDSIZE = 10 + 1 + 1;
+
+int[,] computerWorld = new int[WORLDSIZE, WORLDSIZE]
 										// // Массив для тестового прогона
 										// 										{
 										// 											{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -25,34 +27,146 @@ int[,] computerWorld = new int[12, 12]
 										// 											{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 										// 										}
 										;
-
+int[,] playerWorld = new int[WORLDSIZE, WORLDSIZE];
 
 
 // Массив кораблей. [0] - x, [1] - y; [2] - direction; [3] - decks; [4] - status: 0 - destroyed, 1 - wounded, 2 - initial (new ship, ready to begin fight)
-int[][] squadron = {
+int[][] squadronComputer = {
 	new int[] {0, 0, 0, 4, 2},
 	new int[] {0, 0, 0, 3, 2}, new int[] {0, 0, 0, 3, 2},
 	new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2},
 	new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}
 };
 
-array2dBorder(computerWorld, FILLNUMBER);
+int[][] squadronPlayer = {
+	new int[] {0, 0, 0, 4, 2},
+	new int[] {0, 0, 0, 3, 2}, new int[] {0, 0, 0, 3, 2},
+	new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2},
+	new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}
+};
 
-int[,] stageStart = new int[12, 12];
-Array.Copy(computerWorld, stageStart, computerWorld.Length);
 
-foreach (int[] element in squadron)
+CreateMap(computerWorld, squadronComputer);
+System.Console.WriteLine("computerWorld is created");
+System.Console.WriteLine();
+
+CreateMap(playerWorld, squadronPlayer);
+System.Console.WriteLine("playerWorld is created");
+
+array2dToScreen(playerWorld);
+
+// PrintMap(playerWorld, squadronPlayer);
+
+while (true)
 {
-	ShipPlace(element, stageStart);
-	FillCellsAroundShip(element, stageStart);
+	int stopGame = inputNumberPrompt("Generate new map? (1 - yes, 0 - no)");
+		
+		if (stopGame == 0)
+		{
+			break;
+		}
+		CreateMap(playerWorld, squadronPlayer);
+		System.Console.WriteLine("playerWorld is created");
+
+		ReadyToPrintMap(playerWorld, squadronPlayer);
+
+		
 }
-System.Console.WriteLine("All ships placed on map");
+
+// -------------------- Вывод символьного игрового поля
+void PrintMap(int[,] map)
+{
+	for (int i = 0; i < map.GetLength(0); i++)
+	{
+		if (i > 1 || i < map.GetLength(0) - 1)
+		{
+			System.Console.Write(i);
+			System.Console.Write("\t");
+		}
+		for (int j = 0; j < map.GetLength(1); j++)
+		{
+			if (map[j, i] == FILLNUMBER)
+			{
+				System.Console.Write("•");
+				System.Console.Write(" ");
+			}
+
+			if (map[j, i] == 0)
+			{
+				System.Console.Write(" ");
+				System.Console.Write(" ");
+			}
+
+			if (map[j, i] != 0 && map[j, i] != FILLNUMBER)
+			{
+				// System.Console.Write("@");
+				System.Console.Write(map[j, i]);
+				System.Console.Write(" ");
+			}
+		}
+		System.Console.WriteLine();
+	}
+}
+
+// -------------------- Создание игрового поля для игрока или компьютера
+void CreateMap(int[,] map, int[][] squadron)
+{
+	array2dBorder(map, FILLNUMBER);
+
+	int[,] stageStart = new int[map.GetLength(0), map.GetLength(0)];
+	Array.Copy(map, stageStart, map.Length);
+
+	foreach (int[] element in squadron)
+	{
+		ShipPlace(element, stageStart);
+		FillCellsAroundShip(element, stageStart);
+	}
+	System.Console.WriteLine("All ships placed on map");
+
+};
+
+// --------------------------- map with ships PRINT
+void ReadyToPrintMap(int[,] map, int[][] squadron)
+{
+	int[,] mapLocal = new int[map.GetLength(0), map.GetLength(0)];
+	Array.Copy(map, mapLocal, map.Length);
+
+	array2dBorder(mapLocal, FILLNUMBER);
+
+	foreach (int[] ship in squadron)
+	{
+		int localX = ship[0];
+		int localY = ship[1];
+		int direction = ship[2];
+		int decks = ship[3];
+		
+		mapLocal[localY, localX] = 7;
+		
+		if (decks > 1)
+		{
+			int[] dXdYupperLevel = GetDirection(direction);
+
+			// получаем приращение координат от головы корабля
+			int dXupperLevel = dXdYupperLevel[0];
+			int dYupperLevel = dXdYupperLevel[1];
+
+			for (int decksIndex = 1; decksIndex < decks; decksIndex++)
+			{
+				mapLocal[localY + decksIndex * dYupperLevel, localX + decksIndex * dXupperLevel] = decks;
+			}				
+		}
+	}
+	System.Console.WriteLine();
+	System.Console.WriteLine("Map is ready");
+	// array2dToScreen(mapLocal);
+	PrintMap(mapLocal);
+}
 
 // --------------------------- New Year 2023 - SHIP PLACE
 void ShipPlace(int[] ship, int[,] map)
 {
 	int decks = ship[3];
-	int[,] mapLocal = new int[12, 12];
+	int[,] mapLocal = new int[map.GetLength(0), map.GetLength(0)];
 
 	Array.Copy(map, mapLocal, map.Length);
 
@@ -247,7 +361,7 @@ int countEmptyCells(int[,] arr)
 	return count;
 }
 
-// --------- square border in array fill with 1 -----
+// --------- square border in array fill with NUMBER -----
 void array2dBorder(int[,] arr2d, int number)
 {
 	for (int i = 0; i < arr2d.GetLength(0); i++)
@@ -322,14 +436,21 @@ int GetRandomFrom(int bottom, int top)
 	return result;
 }
 
-// ------------ Continue from here
-// // --------------------- Board to screen
-// void array2dGraphToScreen(int[,] arr2d, int[] squadron)
-// {
-// 	foreach (int[] element in squadron)
-// 	{
-// 		ShipPlace(element, stageStart);
-// 		FillCellsAroundShip(element, stageStart);
-// 	}
-// 	System.Console.WriteLine("All ships placed on map");
-// }
+// ------------------------ safe input int number
+int inputNumberPrompt(string str)
+{
+	int number;
+	string text;
+
+	while (true)
+	{
+		Console.Write($"{str} ");
+		text = Console.ReadLine();
+		if (int.TryParse(text, out number))
+		{
+			break;
+		}
+		Console.WriteLine("Не удалось распознать число, попробуйте еще раз.");
+	}
+	return number;
+}

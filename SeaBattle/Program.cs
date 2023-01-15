@@ -60,18 +60,26 @@ array2dToScreen(playerWorld);
 while (true)
 {
 	int stopGame = inputNumberPrompt("Generate new map? (1 - yes, 0 - no)");
-		
-		if (stopGame == 0)
-		{
-			break;
-		}
-		CreateMap(playerWorld, squadronPlayer);
-		System.Console.WriteLine("playerWorld is created");
 
-		ReadyToPrintMap(playerWorld, squadronPlayer);
+	if (stopGame == 0)
+	{
+		break;
+	}
+	CreateMap(playerWorld, squadronPlayer);
+	System.Console.WriteLine("playerWorld is created");
 
-		
+	ReadyToPrintMap(playerWorld, squadronPlayer);
 }
+
+int[,] computerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
+
+arrayFill(computerBitShotMap, 1, 1);
+
+array2dToScreen(computerBitShotMap);
+
+
+
+
 
 // -------------------- Вывод символьного игрового поля
 void PrintMap(int[,] map)
@@ -87,7 +95,7 @@ void PrintMap(int[,] map)
 		{
 			if (map[j, i] == FILLNUMBER)
 			{
-				System.Console.Write("•");
+				System.Console.Write("*");
 				System.Console.Write(" ");
 			}
 
@@ -139,9 +147,9 @@ void ReadyToPrintMap(int[,] map, int[][] squadron)
 		int localY = ship[1];
 		int direction = ship[2];
 		int decks = ship[3];
-		
+
 		mapLocal[localY, localX] = 7;
-		
+
 		if (decks > 1)
 		{
 			int[] dXdYupperLevel = GetDirection(direction);
@@ -153,7 +161,7 @@ void ReadyToPrintMap(int[,] map, int[][] squadron)
 			for (int decksIndex = 1; decksIndex < decks; decksIndex++)
 			{
 				mapLocal[localY + decksIndex * dYupperLevel, localX + decksIndex * dXupperLevel] = decks;
-			}				
+			}
 		}
 	}
 	System.Console.WriteLine();

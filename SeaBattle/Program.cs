@@ -13,9 +13,6 @@ int EMPTY = 0;
 // Символ для заполнения сита поиска корабля
 int SIEVENUMBER = 1;
 
-
-
-
 // Размер массива игрового поля - 10х10 и ограничение края единицами. Итоговый размер 12х12.
 // Не очень хороший пример для тестирования, но должен срабатывать вплоть до помещения всех однопалубных кораблей.
 // В итеративном прогоне от четырехпалубника до последнего однопалубника на изначатьно пустом поле, матрица заполнения, не позволяющая встать кораблям ближе,
@@ -67,8 +64,8 @@ System.Console.WriteLine("playerWorld is created");
 
 array2dToScreen(playerWorld);
 
-// PrintMap(playerWorld, squadronPlayer);
-
+// Вывод поля игрока и запрос, в бесконечном цикле, на генерацию новой 
+// расстановки кораблей для игрока (человека)
 while (true)
 {
 	int stopGame = inputNumberPrompt("Generate new map? (1 - yes, 0 - no)");
@@ -87,31 +84,32 @@ while (true)
 int[] shipRemainComputer = { 1, 2, 3, 4 };
 int[] shipRemainPlayer = { 1, 2, 3, 4 };
 
-// -------------------- карта клеток, по которым имеет смысл делать выстрел
+// -------------------- карта клеток, по которым имеет смысл делать выстрел (для машины)
 int[,] computerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
 
+// -------------------- Заполнение массива. Для заполнения массива, в конкретном, вырожденном, 
+// -------------------- случае можно использовать решето без шага и сдвига  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 array2dFillWithNumber(computerBitShotMap, SIEVENUMBER);
 array2dBorder(computerBitShotMap, 0);
 
-array2dToScreen(computerBitShotMap);
 
-
+// -------------------- карта клеток, по которым имеет смысл делать выстрел (для человека)
 int[,] playerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
 
 array2dFillWithNumber(playerBitShotMap, SIEVENUMBER);
 array2dBorder(playerBitShotMap, 0);
 
-// array2dToScreen(playerBitShotMap);
 
 // -------------------- карта-решето для поиска текущего корабля
 int[,] computerInitialSieve = new int[WORLDSIZE, WORLDSIZE];
 
+// -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
 int decksForRandomChoice = currentTargetShip(shipRemainPlayer);
 
+// -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
 int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
-// System.Console.WriteLine("shiftRandom");
-// System.Console.WriteLine(shiftRandom);
 
+// -------------------- генерация сита
 sieveGenerate(computerInitialSieve, computerBitShotMap, shiftRandom, SIEVENUMBER, decksForRandomChoice);
 
 array2dToScreen(computerInitialSieve);
@@ -137,6 +135,9 @@ System.Console.Write("localXToFire ");
 System.Console.WriteLine(localXToFire);
 System.Console.Write("localYToFire ");
 System.Console.WriteLine(localYToFire);
+
+// ------------------ Waiting for result
+// ---------------------------------------------------------------------------------- FROM HERE TILL DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -358,15 +359,17 @@ void ShipPlace(int[] ship, int[,] map)
 			int tailY = localY + (decks - 1) * dYupperLevel;
 
 			// ------------ OUTPUT x and y tail
-			System.Console.Write("Direction ");
-			System.Console.Write(item);
-			System.Console.Write(" | tailX ");
-			System.Console.Write(tailX);
-			System.Console.Write(" tailY ");
-			System.Console.Write(tailY);
-			System.Console.Write(" | ");
-			System.Console.Write(ship[3]);
-			System.Console.WriteLine();
+			// ------------ commented on 170123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+			// System.Console.Write("Direction ");
+			// System.Console.Write(item);
+			// System.Console.Write(" | tailX ");
+			// System.Console.Write(tailX);
+			// System.Console.Write(" tailY ");
+			// System.Console.Write(tailY);
+			// System.Console.Write(" | ");
+			// System.Console.Write(ship[3]);
+			// System.Console.WriteLine();
 
 			// decks == 1 - видимо, избыточная проверка для однопалубника
 			// Далее: если хвост корабля в пределах игрового поля, и эта клетка свободна - Ура. Ship on map

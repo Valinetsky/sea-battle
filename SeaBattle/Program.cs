@@ -4,6 +4,18 @@ int DIRECTIONS = 4;
 // Определение границ игрового поля.
 int FILLNUMBER = 8;
 
+// Максимальное количество палуб корабля
+int MAXDECKS = 4;
+
+// Символ пустой клетки для начального заполнения игрового поля
+int EMPTY = 0;
+
+// Символ для заполнения сита поиска корабля
+int SIEVENUMBER = 1;
+
+
+
+
 // Размер массива игрового поля - 10х10 и ограничение края единицами. Итоговый размер 12х12.
 // Не очень хороший пример для тестирования, но должен срабатывать вплоть до помещения всех однопалубных кораблей.
 // В итеративном прогоне от четырехпалубника до последнего однопалубника на изначатьно пустом поле, матрица заполнения, не позволяющая встать кораблям ближе,
@@ -71,15 +83,131 @@ while (true)
 	ReadyToPrintMap(playerWorld, squadronPlayer);
 }
 
+// -------------------- количество оставшихся у компьютера и игрока кораблей
+int[] shipRemainComputer = { 1, 2, 3, 4 };
+int[] shipRemainPlayer = { 1, 2, 3, 4 };
+
+// -------------------- карта клеток, по которым имеет смысл делать выстрел
 int[,] computerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
 
-arrayFill(computerBitShotMap, 1, 1);
+array2dFillWithNumber(computerBitShotMap, SIEVENUMBER);
+array2dBorder(computerBitShotMap, 0);
 
 array2dToScreen(computerBitShotMap);
 
 
+int[,] playerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
+
+array2dFillWithNumber(playerBitShotMap, SIEVENUMBER);
+array2dBorder(playerBitShotMap, 0);
+
+// array2dToScreen(playerBitShotMap);
+
+// -------------------- карта-решето для поиска текущего корабля
+int[,] computerInitialSieve = new int[WORLDSIZE, WORLDSIZE];
+
+int decksForRandomChoice = currentTargetShip(shipRemainPlayer);
+
+int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
+// System.Console.WriteLine("shiftRandom");
+// System.Console.WriteLine(shiftRandom);
+
+sieveGenerate(computerInitialSieve, computerBitShotMap, shiftRandom, SIEVENUMBER, decksForRandomChoice);
+
+array2dToScreen(computerInitialSieve);
 
 
+// Генерация координат для выстрела
+int MAXNUMBERTOFIND = 1;
+
+int numberOfCellsToFire = countCellsWithNumber(computerInitialSieve, MAXNUMBERTOFIND);
+System.Console.Write("numberOfCellsToFire ");
+System.Console.WriteLine(numberOfCellsToFire);
+
+int randomCellToFire = GetRandomFrom(1, numberOfCellsToFire);
+System.Console.Write("randomCellToFire ");
+System.Console.WriteLine(randomCellToFire);
+
+int xAnDyToFire = randomCellXY(randomCellToFire, computerInitialSieve, MAXNUMBERTOFIND);
+
+int localYToFire = xAnDyToFire / 100;
+int localXToFire = xAnDyToFire % 100;
+
+System.Console.Write("localXToFire ");
+System.Console.WriteLine(localXToFire);
+System.Console.Write("localYToFire ");
+System.Console.WriteLine(localYToFire);
+
+
+
+
+
+
+
+
+
+
+// -------------------- Выбор решета для поиска корабля
+int currentTargetShip(int[] squadron)
+{
+	int currentTarget = -1;
+
+	int localIndex = 0;
+
+	while (true)
+	{
+
+		if (squadron[localIndex] != 0)
+		{
+			currentTarget = MAXDECKS - localIndex;
+			return currentTarget;
+		}
+
+		localIndex++;
+
+		if (localIndex > squadron.Length)
+		{
+			return currentTarget;
+		}
+	}
+}
+
+// -------------------- Сито для поиска текущего корабля
+void sieveGenerate(int[,] sieve, int[,] shotThroughMap, int shiftRandom, int fillNumber, int decks)
+{
+	shiftRandom = shiftRandom % decks;
+	int localX = 1 + shiftRandom;
+	int localY = 1;
+
+	int boardBorder = 2;
+
+	int boardWidth = sieve.GetLength(1) - boardBorder;
+	// System.Console.WriteLine("boardWidth");
+	// System.Console.WriteLine(boardWidth);
+	int boardHight = sieve.GetLength(0) - boardBorder;
+	// System.Console.WriteLine("boardHight");
+	// System.Console.WriteLine(boardHight);
+
+	while (true)
+	{
+		sieve[localY, localX] = fillNumber * shotThroughMap[localY, localX];
+
+		localX = localX + decks;
+
+		if (localX > boardWidth)
+		{
+
+			localX = (localY + shiftRandom) % decks + 1;
+
+			localY++;
+
+			if (localY > boardHight)
+			{
+				break;
+			}
+		}
+	}
+}
 
 // -------------------- Вывод символьного игрового поля
 void PrintMap(int[,] map)
@@ -127,7 +255,7 @@ void CreateMap(int[,] map, int[][] squadron)
 	foreach (int[] element in squadron)
 	{
 		ShipPlace(element, stageStart);
-		FillCellsAroundShip(element, stageStart);
+		FillCellsAroundShip(element, stageStart, SIEVENUMBER);
 	}
 	System.Console.WriteLine("All ships placed on map");
 
@@ -178,7 +306,7 @@ void ShipPlace(int[] ship, int[,] map)
 
 	Array.Copy(map, mapLocal, map.Length);
 
-	int emptyCells = countEmptyCells(mapLocal);
+	int emptyCells = countCellsWithNumber(mapLocal, EMPTY);
 
 	while (emptyCells > 0)
 	{
@@ -186,21 +314,22 @@ void ShipPlace(int[] ship, int[,] map)
 		System.Console.Write("randomCell ");
 		System.Console.WriteLine(randomCell);
 
-		int xAnDy = randomCellXY(randomCell, mapLocal);
+		int xAnDy = randomCellXY(randomCell, mapLocal, EMPTY);
 
 		int localY = xAnDy / 100;
 		int localX = xAnDy % 100;
 
 		// emptyCells and decks OUTPUT
-		System.Console.Write("emptyCells ");
-		System.Console.Write(emptyCells);
-		System.Console.Write(" localX ");
-		System.Console.Write(localX);
-		System.Console.Write(" localY ");
-		System.Console.Write(localY);
-		System.Console.Write(" | ");
-		System.Console.Write(ship[3]);
-		System.Console.WriteLine();
+		// commented 170123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// System.Console.Write("emptyCells ");
+		// System.Console.Write(emptyCells);
+		// System.Console.Write(" localX ");
+		// System.Console.Write(localX);
+		// System.Console.Write(" localY ");
+		// System.Console.Write(localY);
+		// System.Console.Write(" | ");
+		// System.Console.Write(ship[3]);
+		// System.Console.WriteLine();
 
 		mapLocal[localY, localX] = 7;
 		array2dToScreen(mapLocal);
@@ -271,9 +400,8 @@ void ShipPlace(int[] ship, int[,] map)
 
 }
 
-
 // --------------------------- fill cell around ship
-void FillCellsAroundShip(int[] ship, int[,] map)
+void FillCellsAroundShip(int[] ship, int[,] map, int fillNumber)
 {
 	int headDeckX = ship[0];
 	int headDeckY = ship[1];
@@ -289,7 +417,7 @@ void FillCellsAroundShip(int[] ship, int[,] map)
 			for (int j = headDeckY - 1; j <= headDeckY + 1; j++)
 			{
 				// j - Y, i - X
-				map[j, i] = 1;
+				map[j, i] = fillNumber;
 			}
 		}
 		headDeckX = headDeckX + dX;
@@ -330,7 +458,7 @@ int[] GetDirection(int number)
 }
 
 // ------------ Get random cell X, Y ----
-int randomCellXY(int number, int[,] arr)
+int randomCellXY(int number, int[,] arr, int numberToFind)
 {
 	int count = 0;
 	int localxAnDy = 0;
@@ -338,7 +466,7 @@ int randomCellXY(int number, int[,] arr)
 	{
 		for (int j = 1; j < arr.GetLength(1) - 1; j++)
 		{
-			if (arr[i, j] == 0)
+			if (arr[i, j] == numberToFind)
 			{
 				count++;
 				if (count == number)
@@ -353,14 +481,14 @@ int randomCellXY(int number, int[,] arr)
 }
 
 // ------------ count of empty cells ---
-int countEmptyCells(int[,] arr)
+int countCellsWithNumber(int[,] arr, int numberToFind)
 {
 	int count = 0;
 	for (int i = 1; i < arr.GetLength(0) - 1; i++)
 	{
 		for (int j = 1; j < arr.GetLength(1) - 1; j++)
 		{
-			if (arr[i, j] == 0)
+			if (arr[i, j] == numberToFind)
 			{
 				count++;
 			}
@@ -398,6 +526,20 @@ void array2dToScreen(int[,] arr2d)
 		for (int j = 0; j < arr2d.GetLength(1); j++)
 		{
 			System.Console.Write($"{arr2d[i, j]} ");
+		}
+		System.Console.WriteLine();
+	}
+	System.Console.WriteLine();
+}
+
+// -------------- 2d-Array fill with number ---
+void array2dFillWithNumber(int[,] arr2d, int number)
+{
+	for (int i = 0; i < arr2d.GetLength(0); i++)
+	{
+		for (int j = 0; j < arr2d.GetLength(1); j++)
+		{
+			arr2d[i, j] = number;
 		}
 		System.Console.WriteLine();
 	}

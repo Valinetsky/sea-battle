@@ -39,17 +39,17 @@ int[,] computerWorld = new int[WORLDSIZE, WORLDSIZE]
 int[,] playerWorld = new int[WORLDSIZE, WORLDSIZE];
 
 
-// Массив кораблей. [0] - x, [1] - y; [2] - direction; [3] - decks; [4] - status: 0 - destroyed, 1 - wounded, 2 - initial (new ship, ready to begin fight)
+// Массив кораблей. [0] - x, [1] - y; [2] - direction; [3] - decks; [4] - status: n = 0 - destroyed, n = [3] — new ship, other n — wounded 
 int[][] squadronComputer = {
-	new int[] {0, 0, 0, 4, 2},
-	new int[] {0, 0, 0, 3, 2}, new int[] {0, 0, 0, 3, 2},
+	new int[] {0, 0, 0, 4, 4},
+	new int[] {0, 0, 0, 3, 3}, new int[] {0, 0, 0, 3, 3},
 	new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2},
 	new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}
 };
 
 int[][] squadronPlayer = {
-	new int[] {0, 0, 0, 4, 2},
-	new int[] {0, 0, 0, 3, 2}, new int[] {0, 0, 0, 3, 2},
+	new int[] {0, 0, 0, 4, 4},
+	new int[] {0, 0, 0, 3, 3}, new int[] {0, 0, 0, 3, 3},
 	new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2}, new int[] {0, 0, 0, 2, 2},
 	new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}, new int[] {0, 0, 1, 1, 1}
 };
@@ -79,10 +79,12 @@ while (true)
 
 	ReadyToPrintMap(playerWorld, squadronPlayer);
 }
+// =================================== Конец раздела генерации игровых полей =====
+
 
 // -------------------- количество оставшихся у компьютера и игрока кораблей
-int[] shipRemainComputer = { 1, 2, 3, 4 };
-int[] shipRemainPlayer = { 1, 2, 3, 4 };
+// int[] shipRemainComputer = { 1, 2, 3, 4 };
+// int[] shipRemainPlayer = { 1, 2, 3, 4 };
 
 // -------------------- карта клеток, по которым имеет смысл делать выстрел (для машины)
 int[,] computerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
@@ -95,8 +97,11 @@ array2dBorder(computerBitShotMap, 0);
 
 // -------------------- карта клеток, по которым имеет смысл делать выстрел (для человека)
 int[,] playerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
+int[,] playerSieveMap = new int[WORLDSIZE, WORLDSIZE];
 
 array2dFillWithNumber(playerBitShotMap, SIEVENUMBER);
+array2dFillWithNumber(playerSieveMap, SIEVENUMBER);
+
 array2dBorder(playerBitShotMap, 0);
 
 
@@ -104,7 +109,7 @@ array2dBorder(playerBitShotMap, 0);
 int[,] computerInitialSieve = new int[WORLDSIZE, WORLDSIZE];
 
 // -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
-int decksForRandomChoice = currentTargetShip(shipRemainPlayer);
+int decksForRandomChoice = currentTargetShip(shipRemainMax(squadronPlayer));
 
 // -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
 int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
@@ -115,38 +120,271 @@ sieveGenerate(computerInitialSieve, computerBitShotMap, shiftRandom, SIEVENUMBER
 array2dToScreen(computerInitialSieve);
 
 
-// Генерация координат для выстрела
+// Генерация полей поиска для возможного выстрела
 int MAXNUMBERTOFIND = 1;
+int maxPlayerNumberToFind = 1;
 
-int numberOfCellsToFire = countCellsWithNumber(computerInitialSieve, MAXNUMBERTOFIND);
-System.Console.Write("numberOfCellsToFire ");
-System.Console.WriteLine(numberOfCellsToFire);
+// int localCoordinates = GetCellToFire(computerInitialSieve, MAXNUMBERTOFIND);
 
-int randomCellToFire = GetRandomFrom(1, numberOfCellsToFire);
-System.Console.Write("randomCellToFire ");
-System.Console.WriteLine(randomCellToFire);
+// int localYToFire = localCoordinates / 100;
+// int localXToFire = localCoordinates % 100;
 
-int xAnDyToFire = randomCellXY(randomCellToFire, computerInitialSieve, MAXNUMBERTOFIND);
+// System.Console.Write("localXToFire ");
+// System.Console.WriteLine(localXToFire);
+// System.Console.Write("localYToFire ");
+// System.Console.WriteLine(localYToFire);
 
-int localYToFire = xAnDyToFire / 100;
-int localXToFire = xAnDyToFire % 100;
 
-System.Console.Write("localXToFire ");
-System.Console.WriteLine(localXToFire);
-System.Console.Write("localYToFire ");
-System.Console.WriteLine(localYToFire);
+
+// ------------------------------------- MAIN CYCLE
+bool playerTurn = true;
+
+// Бросаем монетку на очередность хода
+int coinToss = GetRandomFrom(0, 1);
+if (coinToss == 0)
+{
+	playerTurn = !playerTurn;
+}
+
+int playerShips = 10;
+int computerShips = 10;
+
+int maxPlayerTurn = 0;
+int maxComputerTurn = 0;
+
+while (true)
+{
+	if (playerTurn)
+	{
+		while (true)
+		{
+			maxPlayerTurn++;
+
+			int localCoordinates = GetCellToFire(playerBitShotMap, maxPlayerNumberToFind);
+
+			int localYToFire = localCoordinates / 100;
+			int localXToFire = localCoordinates % 100;
+
+			System.Console.Write("localXToFire ");
+			System.Console.WriteLine(localXToFire);
+			System.Console.Write("localYToFire ");
+			System.Console.WriteLine(localYToFire);
+
+			playerBitShotMap[localYToFire, localXToFire] = 0;
+
+			int shootResult = FireResult(localXToFire, localYToFire, squadronComputer);
+
+			// Выстрел в молоко
+			if (shootResult == -1)
+			{
+				playerTurn = !playerTurn;
+				break;
+			}
+
+			// int shipSize = squadronComputer[shootResult][3];
+			int shipStatus = squadronComputer[shootResult][4];
+
+			// Если корабль потоплен
+			if (shipStatus == 0)
+			{
+				maxPlayerNumberToFind = 1;
+				FillCellsAroundShip(squadronComputer[shootResult], playerBitShotMap, 0);
+				computerShips--;
+				if (computerShips == 0)
+				{
+					GameOver;
+				}
+				continue;
+			}
+
+			// Если корабль ранен
+			maxPlayerNumberToFind = 2;
+
+			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerBitShotMap);
+			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerSieveMap);
+
+			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, playerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
+			continue;
+
+		}
+	}
+
+	if (!playerTurn)
+	{
+		while (true)
+		{
+			maxComputerTurn++;
+
+			int localCoordinates = GetCellToFire(computerBitShotMap, MAXNUMBERTOFIN);
+
+			int localYToFire = localCoordinates / 100;
+			int localXToFire = localCoordinates % 100;
+
+			System.Console.Write("localXToFire ");
+			System.Console.WriteLine(localXToFire);
+			System.Console.Write("localYToFire ");
+			System.Console.WriteLine(localYToFire);
+
+			computerBitShotMap[localYToFire, localXToFire] = 0;
+
+			int shootResult = FireResult(localXToFire, localYToFire, squadronPlayer);
+
+			// Выстрел в молоко
+			if (shootResult == -1)
+			{
+				playerTurn = !playerTurn;
+				break;
+			}
+
+			// int shipSize = squadronComputer[shootResult][3];
+			int shipStatus = squadronComputer[shootResult][4];
+
+			// Если корабль потоплен
+			if (shipStatus == 0)
+			{
+
+				maxPlayerNumberToFind = 1;
+				FillCellsAroundShip(squadronPlayer[shootResult], computerBitShotMap, 0);
+				playerShips--;
+				if (computerShips == 0)
+				{
+					GameOver;
+				}
+
+				// _____________________________________________________________________________
+				// _____________________________________________________________________________
+				// _____________________________________________________________________________
+				// Сделать проверку и при надобности сгенерировать новое сито!!!
+				// 20.01.23
+
+				continue;
+			}
+
+			// Если корабль ранен
+			MAXNUMBERTOFIND = 2;
+
+			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerBitShotMap);
+			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerInitialSieve);
+
+			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, computerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
+			continue;
+
+		}
+	}
+}
+
+
+
+// --------------- shipRemainMax
+int shipRemainMax(int[][] squadron)
+{
+	foreach (var ship in squadron)
+	{
+		if (ship[4] != 0)
+		{
+			return ship[3];
+		}
+	}
+	return -1;
+}
+
+// --------------- Fill Cells Around Wounded Deck
+void FillCellsAroundWoundedDeckDiagonal(int localX, int localY, int[,] map)
+{
+	map[localX - 1, localY - 1] = 0;
+	map[localX + 1, localY - 1] = 0;
+	map[localX - 1, localY + 1] = 0;
+	map[localX + 1, localY + 1] = 0;
+}
+
+void FillCellsAroundWoundedDeckCross(int localX, int localY, int[,] map, int[,] sieve, int fillNumber)
+{
+	map[localX, localY - 1] = fillNumber * sieve[localX, localY - 1];
+	map[localX - 1, localY] = fillNumber * sieve[localX - 1, localY];
+	map[localX + 1, localY] = fillNumber * sieve[localX + 1, localY];
+	map[localX, localY + 1] = fillNumber * sieve[localX, localY + 1];
+}
 
 // ------------------ Waiting for result
 // ---------------------------------------------------------------------------------- FROM HERE TILL DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+// ------------------- FireResult
+int FireResult(int localX, int localY, int[][] localSquadron)
+{
+	int count = 0;
+
+	foreach (var ship in localSquadron)
+	{
+
+		if (ship[4] == 0)
+		{
+			continue;
+		}
+
+		int shipHeadX = ship[0];
+		int shipHeadY = ship[1];
+		int shipDirection = ship[2];
+		int shipDecks = ship[3];
+
+		// ------------------------------------------- Этот блок повторяется в функции ShipPlace. Надо будет переписать!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		int[] dXdYupperLevel = GetDirection(shipDirection);
+
+		// получаем приращение координат от головы корабля
+		int dXupperLevel = dXdYupperLevel[0];
+		int dYupperLevel = dXdYupperLevel[1];
+
+		// получаем координату последней палубы корабля
+		int shipTailX = localX + (shipDecks - 1) * dXupperLevel;
+		int shipTailY = localY + (shipDecks - 1) * dYupperLevel;
+
+		// ------------------------------ Проверка на попадание по кораблю
+		// Если мы внутри корабля по координате X
+		if (localX == shipHeadX
+				// И внутри корабля по координате Y
+				&& (localY <= Math.Max(shipHeadY, shipTailY)
+				&& localY >= Math.Min(shipHeadY, shipTailY))
+				||
+			// Или наоборот
+			localY == shipHeadY
+				&& (localX <= Math.Max(shipHeadX, shipTailX)
+				&& localX >= Math.Min(shipHeadX, shipTailX))
+				// И при этом — корабль не потоплен 
+				|| ship[4] != 0)
+		{
+			ship[4]--;
+			return count;
+		}
+		count++;
+	}
+	return -1;
+}
+
+
+// -------------------- GameOver
+void GameOver()
+{
+
+}
 
 
 
 
 
+// ------------------------- GetCellToFire
+int GetCellToFire(int[,] sieve, int numberToFind)
+{
+	int numberOfCellsToFire = countCellsWithNumber(sieve, numberToFind);
+	System.Console.Write("numberOfCellsToFire ");
+	System.Console.WriteLine(numberOfCellsToFire);
 
+	int randomCellToFire = GetRandomFrom(1, numberOfCellsToFire);
+	System.Console.Write("randomCellToFire ");
+	System.Console.WriteLine(randomCellToFire);
 
+	int xAnDyToFire = randomCellXY(randomCellToFire, sieve, numberToFind);
 
+	return xAnDyToFire;
+}
 
 // -------------------- Выбор решета для поиска корабля
 int currentTargetShip(int[] squadron)
@@ -319,18 +557,6 @@ void ShipPlace(int[] ship, int[,] map)
 
 		int localY = xAnDy / 100;
 		int localX = xAnDy % 100;
-
-		// emptyCells and decks OUTPUT
-		// commented 170123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		// System.Console.Write("emptyCells ");
-		// System.Console.Write(emptyCells);
-		// System.Console.Write(" localX ");
-		// System.Console.Write(localX);
-		// System.Console.Write(" localY ");
-		// System.Console.Write(localY);
-		// System.Console.Write(" | ");
-		// System.Console.Write(ship[3]);
-		// System.Console.WriteLine();
 
 		mapLocal[localY, localX] = 7;
 		array2dToScreen(mapLocal);

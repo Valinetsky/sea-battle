@@ -134,6 +134,130 @@ int maxPlayerNumberToFind = 1;
 
 
 // ------------------------------------- MAIN CYCLE
+
+
+// while (true)
+// {
+// 	if (playerTurn)
+// 	{
+// 		while (true)
+// 		{
+// 			maxPlayerTurn++;
+
+// 			int localCoordinates = GetCellToFire(playerBitShotMap, maxPlayerNumberToFind);
+
+// 			int localYToFire = localCoordinates / 100;
+// 			int localXToFire = localCoordinates % 100;
+
+// 			System.Console.Write("localXToFire ");
+// 			System.Console.WriteLine(localXToFire);
+// 			System.Console.Write("localYToFire ");
+// 			System.Console.WriteLine(localYToFire);
+
+// 			playerBitShotMap[localYToFire, localXToFire] = 0;
+
+// 			int shootResult = FireResult(localXToFire, localYToFire, squadronComputer);
+
+// 			// Выстрел в молоко
+// 			if (shootResult == -1)
+// 			{
+// 				playerTurn = !playerTurn;
+// 				break;
+// 			}
+
+// 			// int shipSize = squadronComputer[shootResult][3];
+// 			int shipStatus = squadronComputer[shootResult][4];
+
+// 			// Если корабль потоплен
+// 			if (shipStatus == 0)
+// 			{
+// 				maxPlayerNumberToFind = 1;
+// 				FillCellsAroundShip(squadronComputer[shootResult], playerBitShotMap, 0);
+// 				computerShips--;
+// 				if (computerShips == 0)
+// 				{
+// 					GameOver;
+// 				}
+// 				continue;
+// 			}
+
+// 			// Если корабль ранен
+// 			maxPlayerNumberToFind = 2;
+
+// 			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerBitShotMap);
+// 			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerSieveMap);
+
+// 			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, playerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
+// 			continue;
+
+// 		}
+// 	}
+
+// 	if (!playerTurn)
+// 	{
+// 		while (true)
+// 		{
+// 			maxComputerTurn++;
+
+// 			int localCoordinates = GetCellToFire(computerBitShotMap, MAXNUMBERTOFIN);
+
+// 			int localYToFire = localCoordinates / 100;
+// 			int localXToFire = localCoordinates % 100;
+
+// 			System.Console.Write("localXToFire ");
+// 			System.Console.WriteLine(localXToFire);
+// 			System.Console.Write("localYToFire ");
+// 			System.Console.WriteLine(localYToFire);
+
+// 			computerBitShotMap[localYToFire, localXToFire] = 0;
+
+// 			int shootResult = FireResult(localXToFire, localYToFire, squadronPlayer);
+
+// 			// Выстрел в молоко
+// 			if (shootResult == -1)
+// 			{
+// 				playerTurn = !playerTurn;
+// 				break;
+// 			}
+
+// 			// int shipSize = squadronComputer[shootResult][3];
+// 			int shipStatus = squadronComputer[shootResult][4];
+
+// 			// Если корабль потоплен
+// 			if (shipStatus == 0)
+// 			{
+
+// 				maxPlayerNumberToFind = 1;
+// 				FillCellsAroundShip(squadronPlayer[shootResult], computerBitShotMap, 0);
+// 				playerShips--;
+// 				if (computerShips == 0)
+// 				{
+// 					GameOver;
+// 				}
+
+// 				// _____________________________________________________________________________
+// 				// _____________________________________________________________________________
+// 				// _____________________________________________________________________________
+// 				// Сделать проверку и при надобности сгенерировать новое сито!!!
+// 				// 20.01.23
+
+// 				continue;
+// 			}
+
+// 			// Если корабль ранен
+// 			MAXNUMBERTOFIND = 2;
+
+// 			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerBitShotMap);
+// 			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerInitialSieve);
+
+// 			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, computerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
+// 			continue;
+
+// 		}
+// 	}
+// }
+
+
 bool playerTurn = true;
 
 // Бросаем монетку на очередность хода
@@ -143,148 +267,61 @@ if (coinToss == 0)
 	playerTurn = !playerTurn;
 }
 
-int playerShips = 10;
-int computerShips = 10;
+int playerShip = 4;
+int computerShip = 4;
 
 int maxPlayerTurn = 0;
 int maxComputerTurn = 0;
 
+
+
 while (true)
 {
+	System.Console.Write("Turn ");
+	System.Console.WriteLine(playerTurn);
+	Console.ReadLine();
+
 	if (playerTurn)
 	{
-		while (true)
-		{
-			maxPlayerTurn++;
-
-			int localCoordinates = GetCellToFire(playerBitShotMap, maxPlayerNumberToFind);
-
-			int localYToFire = localCoordinates / 100;
-			int localXToFire = localCoordinates % 100;
-
-			System.Console.Write("localXToFire ");
-			System.Console.WriteLine(localXToFire);
-			System.Console.Write("localYToFire ");
-			System.Console.WriteLine(localYToFire);
-
-			playerBitShotMap[localYToFire, localXToFire] = 0;
-
-			int shootResult = FireResult(localXToFire, localYToFire, squadronComputer);
-
-			// Выстрел в молоко
-			if (shootResult == -1)
-			{
-				playerTurn = !playerTurn;
-				break;
-			}
-
-			// int shipSize = squadronComputer[shootResult][3];
-			int shipStatus = squadronComputer[shootResult][4];
-
-			// Если корабль потоплен
-			if (shipStatus == 0)
-			{
-				maxPlayerNumberToFind = 1;
-				FillCellsAroundShip(squadronComputer[shootResult], playerBitShotMap, 0);
-				computerShips--;
-				if (computerShips == 0)
-				{
-					GameOver;
-				}
-				continue;
-			}
-
-			// Если корабль ранен
-			maxPlayerNumberToFind = 2;
-
-			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerBitShotMap);
-			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, playerSieveMap);
-
-			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, playerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
-			continue;
-
-		}
+		maxPlayerTurn = MainPlay(playerBitShotMap, playerSieveMap, squadronComputer, playerShip, maxPlayerTurn);
 	}
 
 	if (!playerTurn)
 	{
-		while (true)
-		{
-			maxComputerTurn++;
-
-			int localCoordinates = GetCellToFire(computerBitShotMap, MAXNUMBERTOFIN);
-
-			int localYToFire = localCoordinates / 100;
-			int localXToFire = localCoordinates % 100;
-
-			System.Console.Write("localXToFire ");
-			System.Console.WriteLine(localXToFire);
-			System.Console.Write("localYToFire ");
-			System.Console.WriteLine(localYToFire);
-
-			computerBitShotMap[localYToFire, localXToFire] = 0;
-
-			int shootResult = FireResult(localXToFire, localYToFire, squadronPlayer);
-
-			// Выстрел в молоко
-			if (shootResult == -1)
-			{
-				playerTurn = !playerTurn;
-				break;
-			}
-
-			// int shipSize = squadronComputer[shootResult][3];
-			int shipStatus = squadronComputer[shootResult][4];
-
-			// Если корабль потоплен
-			if (shipStatus == 0)
-			{
-
-				maxPlayerNumberToFind = 1;
-				FillCellsAroundShip(squadronPlayer[shootResult], computerBitShotMap, 0);
-				playerShips--;
-				if (computerShips == 0)
-				{
-					GameOver;
-				}
-
-				// _____________________________________________________________________________
-				// _____________________________________________________________________________
-				// _____________________________________________________________________________
-				// Сделать проверку и при надобности сгенерировать новое сито!!!
-				// 20.01.23
-
-				continue;
-			}
-
-			// Если корабль ранен
-			MAXNUMBERTOFIND = 2;
-
-			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerBitShotMap);
-			FillCellsAroundWoundedDeckDiagonal(localXToFire, localYToFire, computerInitialSieve);
-
-			FillCellsAroundWoundedDeckCross(localXToFire, localYToFire, computerBitShotMap, playerSieveMap, maxPlayerNumberToFind);
-			continue;
-
-		}
+		maxComputerTurn = MainPlay(computerBitShotMap, computerInitialSieve, squadronPlayer, computerShip, maxComputerTurn);
 	}
+
 }
 
 
 // ----------------------- NEW UNIVERSAL MAIN PLAY FUNCTION
-int MainPlay (int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind, int turn)
+int MainPlay(int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind, int turn)
 {
 	int numberToFind = MaxIn2dArray(map);
-		
+
 	while (true)
 	{
 		turn++;
-			
+
+		// Вывод игрового поля !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		System.Console.WriteLine();
+		System.Console.WriteLine("Players Map");
+		ReadyToPrintMap(playerBitShotMap, squadronComputer);
+
+		System.Console.WriteLine();
+		System.Console.WriteLine("Computers Map");
+		ReadyToPrintMap(computerBitShotMap, squadronPlayer);
+
 		int localCoordinates = GetCellToFire(sieve, numberToFind);
 
 		int localY = localCoordinates / 100;
 		int localX = localCoordinates % 100;
-		
+
+		System.Console.Write("localX ");
+		System.Console.WriteLine(localX);
+		System.Console.Write("localY ");
+		System.Console.WriteLine(localY);
+
 		map[localY, localX] = 0;
 		sieve[localY, localX] = 0;
 
@@ -303,8 +340,8 @@ int MainPlay (int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind
 		// Если корабль потоплен
 		if (shipStatus == 0)
 		{
-			int newShipToFind = shipRemainMax(squadron); 
-			
+			int newShipToFind = shipRemainMax(squadron);
+
 			if (newShipToFind == -1)
 			{
 				GameOver(turn);
@@ -323,11 +360,9 @@ int MainPlay (int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind
 					MAXDECKS = newShipToFind;
 
 					NewSieve(computerInitialSieve, computerBitShotMap, squadronPlayer);
-
 				}
 			}
 			continue;
-
 		}
 
 		// Если корабль ранен
@@ -351,8 +386,8 @@ int MainPlay (int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind
 int MaxIn2dArray(int[,] map)
 {
 	int maxValue = 0;
-	
-	foreach (int cell in map) 
+
+	foreach (int cell in map)
 	{
 		maxValue = maxValue < cell ? cell : maxValue;
 	}
@@ -373,12 +408,12 @@ void NewSieve(int[,] sieve, int[,] bitmap, int[][] squadron)
 	sieveGenerate(sieve, bitmap, shiftRandom, SIEVENUMBER, decksForRandomChoice);
 
 
-// // -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
-// int decksForRandomChoice = currentTargetShip(shipRemainMax(squadronPlayer));
+	// // -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
+	// int decksForRandomChoice = currentTargetShip(shipRemainMax(squadronPlayer));
 
 
-// // -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
-// int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
+	// // -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
+	// int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
 }
 
 // --------------- shipRemainMax
@@ -454,10 +489,10 @@ int FireResult(int localX, int localY, int[][] localSquadron)
 			localY == shipHeadY
 				&& (localX <= Math.Max(shipHeadX, shipTailX)
 				&& localX >= Math.Min(shipHeadX, shipTailX)))
-				// И при этом — корабль не потоплен
+		// И при этом — корабль не потоплен
 
-				// Ерунда. Мы по определению не можем стрелять по потопленному кораблю!
-				// || ship[4] != 0)
+		// Ерунда. Мы по определению не можем стрелять по потопленному кораблю!
+		// || ship[4] != 0)
 		{
 			ship[4]--;
 			return count;
@@ -469,8 +504,9 @@ int FireResult(int localX, int localY, int[][] localSquadron)
 
 
 // -------------------- GameOver
-void GameOver()
+void GameOver(int number)
 {
+	System.Console.WriteLine("GAME OVER");
 	return;
 }
 
@@ -557,15 +593,24 @@ void sieveGenerate(int[,] sieve, int[,] shotThroughMap, int shiftRandom, int fil
 }
 
 // -------------------- Вывод символьного игрового поля
+// void PrintMap(int[,] map, int emptyNumber, int ship)
 void PrintMap(int[,] map)
 {
+	System.Console.WriteLine(" \t  1 2 3 4 5 6 7 8 9 10");
 	for (int i = 0; i < map.GetLength(0); i++)
 	{
-		if (i > 1 || i < map.GetLength(0) - 1)
+		if (i < 1 || i > map.GetLength(0) - 2)
+		{
+			System.Console.Write(" ");
+			System.Console.Write("\t");
+		}
+
+		if (i > 0 && i < map.GetLength(0) - 1)
 		{
 			System.Console.Write(i);
 			System.Console.Write("\t");
 		}
+
 		for (int j = 0; j < map.GetLength(1); j++)
 		{
 			if (map[j, i] == FILLNUMBER)
@@ -590,6 +635,13 @@ void PrintMap(int[,] map)
 		System.Console.WriteLine();
 	}
 }
+
+// // -------------------- MapState
+// int[,] MapState(int[,] map, int[][] squadron)
+// {
+
+// }
+
 
 // -------------------- Создание игрового поля для игрока или компьютера
 void CreateMap(int[,] map, int[][] squadron)

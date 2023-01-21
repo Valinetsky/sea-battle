@@ -4,7 +4,7 @@ int DIRECTIONS = 4;
 // Определение границ игрового поля.
 int FILLNUMBER = 8;
 
-// Максимальное количество палуб корабля
+// Начальное количество палуб корабля для генерации сита
 int MAXDECKS = 4;
 
 // Символ пустой клетки для начального заполнения игрового поля
@@ -12,6 +12,9 @@ int EMPTY = 0;
 
 // Символ для заполнения сита поиска корабля
 int SIEVENUMBER = 1;
+
+// Поле статуса в массиве корабля [4]
+int STATUS = 4;
 
 // Размер массива игрового поля - 10х10 и ограничение края единицами. Итоговый размер 12х12.
 // Не очень хороший пример для тестирования, но должен срабатывать вплоть до помещения всех однопалубных кораблей.
@@ -79,14 +82,13 @@ while (true)
 
 	ReadyToPrintMap(playerWorld, squadronPlayer);
 }
+// ===============================================================================
 // =================================== Конец раздела генерации игровых полей =====
+// ===============================================================================
 
 
-// -------------------- количество оставшихся у компьютера и игрока кораблей
-// int[] shipRemainComputer = { 1, 2, 3, 4 };
-// int[] shipRemainPlayer = { 1, 2, 3, 4 };
 
-// -------------------- карта клеток, по которым имеет смысл делать выстрел (для машины)
+// -------------------- карта клеток, по которым имеет смысл делать выстрел (для компьютера)
 int[,] computerBitShotMap = new int[WORLDSIZE, WORLDSIZE];
 
 // -------------------- Заполнение массива. Для заполнения массива, в конкретном, вырожденном, 
@@ -103,19 +105,14 @@ array2dFillWithNumber(playerBitShotMap, SIEVENUMBER);
 array2dFillWithNumber(playerSieveMap, SIEVENUMBER);
 
 array2dBorder(playerBitShotMap, 0);
+array2dBorder(playerSieveMap, 0);
 
 
 // -------------------- карта-решето для поиска текущего корабля
 int[,] computerInitialSieve = new int[WORLDSIZE, WORLDSIZE];
 
-// -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
-int decksForRandomChoice = currentTargetShip(shipRemainMax(squadronPlayer));
-
-// -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
-int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
-
-// -------------------- генерация сита
-sieveGenerate(computerInitialSieve, computerBitShotMap, shiftRandom, SIEVENUMBER, decksForRandomChoice);
+// -------------------- генерация сита для компьютера
+NewSieve(computerInitialSieve, computerBitShotMap, squadronPlayer);
 
 array2dToScreen(computerInitialSieve);
 
@@ -274,6 +271,115 @@ while (true)
 }
 
 
+// ----------------------- NEW UNIVERSAL MAIN PLAY FUNCTION
+int MainPlay (int[,] map, int[,] sieve, int[][] squadron, int currentDecksToFind, int turn)
+{
+	int numberToFind = MaxIn2dArray(map);
+		
+	while (true)
+	{
+		turn++;
+			
+		int localCoordinates = GetCellToFire(sieve, numberToFind);
+
+		int localY = localCoordinates / 100;
+		int localX = localCoordinates % 100;
+		
+		map[localY, localX] = 0;
+		sieve[localY, localX] = 0;
+
+		int shootResult = FireResult(localX, localY, squadron);
+
+		// Выстрел в молоко
+		if (shootResult == -1)
+		{
+			playerTurn = !playerTurn;
+			return turn;
+		}
+
+		// узнаем статус корабля, к который попали
+		int shipStatus = squadron[shootResult][STATUS];
+
+		// Если корабль потоплен
+		if (shipStatus == 0)
+		{
+			int newShipToFind = shipRemainMax(squadron); 
+			
+			if (newShipToFind == -1)
+			{
+				GameOver(turn);
+				return -1;
+			}
+
+			numberToFind = 1;
+
+			FillCellsAroundShip(squadron[shootResult], map, 0);
+			FillCellsAroundShip(squadron[shootResult], sieve, 0);
+
+			if (!playerTurn)
+			{
+				if (newShipToFind < MAXDECKS)
+				{
+					MAXDECKS = newShipToFind;
+
+					NewSieve(computerInitialSieve, computerBitShotMap, squadronPlayer);
+
+				}
+			}
+			continue;
+
+		}
+
+		// Если корабль ранен
+		numberToFind = 2;
+
+		FillCellsAroundWoundedDeckDiagonal(localX, localY, map);
+		FillCellsAroundWoundedDeckDiagonal(localX, localY, sieve);
+
+		FillCellsAroundWoundedDeckCross(localX, localY, map, sieve, numberToFind);
+		continue;
+
+	}
+}
+
+
+
+
+
+
+// --------------- MaxIn2dArray
+int MaxIn2dArray(int[,] map)
+{
+	int maxValue = 0;
+	
+	foreach (int cell in map) 
+	{
+		maxValue = maxValue < cell ? cell : maxValue;
+	}
+	Console.WriteLine("наибольшее число в этом двухмерном массиве : " + maxValue);
+	return maxValue;
+}
+
+
+// -------------------- Функция генерации нового решета
+void NewSieve(int[,] sieve, int[,] bitmap, int[][] squadron)
+{
+	// -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
+	int decksForRandomChoice = shipRemainMax(squadron);
+
+	// -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
+	int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
+
+	sieveGenerate(sieve, bitmap, shiftRandom, SIEVENUMBER, decksForRandomChoice);
+
+
+// // -------------------- поиск и выбор числа палуб самого большого живого корабля в моменте
+// int decksForRandomChoice = currentTargetShip(shipRemainMax(squadronPlayer));
+
+
+// // -------------------- случайный сдвиг для текущего сита. (Сито — это сито. Для просеивания. Никаких Dart-вёдер.)
+// int shiftRandom = GetRandomFrom(0, decksForRandomChoice - 1);
+}
 
 // --------------- shipRemainMax
 int shipRemainMax(int[][] squadron)
@@ -297,12 +403,12 @@ void FillCellsAroundWoundedDeckDiagonal(int localX, int localY, int[,] map)
 	map[localX + 1, localY + 1] = 0;
 }
 
-void FillCellsAroundWoundedDeckCross(int localX, int localY, int[,] map, int[,] sieve, int fillNumber)
+void FillCellsAroundWoundedDeckCross(int localX, int localY, int[,] map, int[,] bitMap, int fillNumber)
 {
-	map[localX, localY - 1] = fillNumber * sieve[localX, localY - 1];
-	map[localX - 1, localY] = fillNumber * sieve[localX - 1, localY];
-	map[localX + 1, localY] = fillNumber * sieve[localX + 1, localY];
-	map[localX, localY + 1] = fillNumber * sieve[localX, localY + 1];
+	map[localX, localY - 1] = fillNumber * bitMap[localX, localY - 1];
+	map[localX - 1, localY] = fillNumber * bitMap[localX - 1, localY];
+	map[localX + 1, localY] = fillNumber * bitMap[localX + 1, localY];
+	map[localX, localY + 1] = fillNumber * bitMap[localX, localY + 1];
 }
 
 // ------------------ Waiting for result
@@ -347,9 +453,11 @@ int FireResult(int localX, int localY, int[][] localSquadron)
 			// Или наоборот
 			localY == shipHeadY
 				&& (localX <= Math.Max(shipHeadX, shipTailX)
-				&& localX >= Math.Min(shipHeadX, shipTailX))
-				// И при этом — корабль не потоплен 
-				|| ship[4] != 0)
+				&& localX >= Math.Min(shipHeadX, shipTailX)))
+				// И при этом — корабль не потоплен
+
+				// Ерунда. Мы по определению не можем стрелять по потопленному кораблю!
+				// || ship[4] != 0)
 		{
 			ship[4]--;
 			return count;
@@ -363,7 +471,7 @@ int FireResult(int localX, int localY, int[][] localSquadron)
 // -------------------- GameOver
 void GameOver()
 {
-
+	return;
 }
 
 

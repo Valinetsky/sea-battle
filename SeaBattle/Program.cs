@@ -446,8 +446,7 @@ void FillCellsAroundWoundedDeckCross(int localX, int localY, int[,] map, int[,] 
 	map[localX, localY + 1] = fillNumber * bitMap[localX, localY + 1];
 }
 
-// ------------------ Waiting for result
-// ---------------------------------------------------------------------------------- FROM HERE TILL DOWN !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 // ------------------- FireResult
 int FireResult(int localX, int localY, int[][] localSquadron)
@@ -592,11 +591,18 @@ void sieveGenerate(int[,] sieve, int[,] shotThroughMap, int shiftRandom, int fil
 	}
 }
 
+// -------------------- Подготовка и вывод игровых полей компьютера и игрока
+void PrepareMap(int[,] mapPlayer, int[,] sievePlayer, bool showShip)
+{
+
+}
+
+
 // -------------------- Вывод символьного игрового поля
 // void PrintMap(int[,] map, int emptyNumber, int ship)
 void PrintMap(int[,] map)
 {
-	System.Console.WriteLine(" \t  1 2 3 4 5 6 7 8 9 10");
+	System.Console.WriteLine(" \t  1 2 3 4 5 6 7 8 9 10 \t  1 2 3 4 5 6 7 8 9 10");
 	for (int i = 0; i < map.GetLength(0); i++)
 	{
 		if (i < 1 || i > map.GetLength(0) - 2)
@@ -628,7 +634,7 @@ void PrintMap(int[,] map)
 			if (map[j, i] != 0 && map[j, i] != FILLNUMBER)
 			{
 				// System.Console.Write("@");
-				System.Console.Write(map[j, i]);
+				System.Console.Write("@");
 				System.Console.Write(" ");
 			}
 		}
@@ -691,8 +697,7 @@ void ReadyToPrintMap(int[,] map, int[][] squadron)
 			}
 		}
 	}
-	System.Console.WriteLine();
-	System.Console.WriteLine("Map is ready");
+
 	// array2dToScreen(mapLocal);
 	PrintMap(mapLocal);
 }
@@ -869,7 +874,7 @@ int randomCellXY(int number, int[,] arr, int numberToFind)
 	return localxAnDy;
 }
 
-// ------------ count of empty cells ---
+// ------------ count of cells contain NUMBER ---
 int countCellsWithNumber(int[,] arr, int numberToFind)
 {
 	int count = 0;

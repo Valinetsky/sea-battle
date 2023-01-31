@@ -165,7 +165,25 @@ while (true)
 	{
 		break;
 	}
+
+	
 }
+
+System.Console.WriteLine();
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine();
+Console.WriteLine((playerTurn) ? "                  PLAYER WIN" : "                COMPUTER  WIN");
+System.Console.WriteLine();
+System.Console.WriteLine("&&&&&&&&&&&&&&&&   on  turn  &&&&&&&&&&&&&&");
+System.Console.WriteLine();
+System.Console.Write("                      ");
+System.Console.WriteLine(overalTurnCount);
+System.Console.WriteLine();
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine();
+PrintSymbolMap(computerWorld, playerWorld, HIDESHIP);
 // =====================================================================
 // ====================  END of MAIN LOOP  =============================
 // =====================================================================
@@ -181,8 +199,11 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 		// Вывод игрового поля !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		System.Console.WriteLine();
 		System.Console.WriteLine("------------------------------------------------------");
-		array2dToScreen(sieve);
-		array2dToScreen(bitmap);
+		
+		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+		// array2dToScreen(sieve);
+		// array2dToScreen(bitmap);
+
 		PrintSymbolMap(computerWorld, playerWorld, HIDESHIP);
 
 		int[] arrayFindAndCount = GetAndCountMaxIn2dArray(sieve);
@@ -207,10 +228,15 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 		System.Console.Write(" ");
 
 		int shootResult = map[localY, localX];
-		Console.Write("shootResult ");
-		Console.WriteLine(shootResult);
 
-		Console.ReadLine();
+		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+		// Console.Write("shootResult ");
+		// Console.WriteLine(shootResult);
+
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Останов между выстрелами !!!!!!!!!!!!!!!!!!!!!
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// Console.ReadLine();
 
 		// Число для сдвига корабля. Четырехпалубник на карте имеет номер 10, последний однопалубник 19
 		int shipShift = 10;
@@ -226,16 +252,21 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 
 		// узнаем статус корабля, в который попали
 		int shipUnderFire = shootResult - shipShift;
-		Console.Write("shipUnderFire #");
-		Console.WriteLine(shipUnderFire);
+
+		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+		// Console.Write("shipUnderFire #");
+		// Console.WriteLine(shipUnderFire);
 
 		int shipStatus = squadron[shipUnderFire][DIRECTIONS];
-		Console.Write("shipStatus #");
-		Console.WriteLine(shipStatus);
+
+		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+		// Console.Write("shipStatus #");
+		// Console.WriteLine(shipStatus);
 
 		// Если корабль потоплен
 		if (shipStatus <= 1)
 		{
+			System.Console.WriteLine();
 			System.Console.WriteLine("SHIP DESTROYED!!!");
 
 			squadron[shipUnderFire][DIRECTIONS] = EMPTY;
@@ -248,12 +279,33 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 				break;
 			}
 
-			var currentShip = GetCurrentShip(squadron, shipUnderFire);
+			System.Console.WriteLine();
+			System.Console.WriteLine("HIT!!!");
+			int[] currentShip = GetCurrentShip(squadron, shipUnderFire);
 
-			System.Console.WriteLine("FillCellsAroundShip DESTROYED!!!");
+			// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+			// System.Console.WriteLine("FillCellsAroundShip DESTROYED!!!");
+			// System.Console.Write(currentShip[0]);
+			// System.Console.Write(currentShip[1]);
+			// System.Console.Write(currentShip[2]);
+			// System.Console.Write(currentShip[3]);
+			// System.Console.Write(currentShip[4]);
+			// System.Console.WriteLine();
 
-			FillCellsAroundShip(bitmap, currentShip, EMPTY);
-			FillCellsAroundShip(sieve, currentShip, EMPTY);
+			// // BEFORE
+			// System.Console.WriteLine("BEFORE");
+			// array2dToScreen(sieve);
+			// array2dToScreen(bitmap);
+
+			ChangeNumberIn2dArray(sieve, 2, EMPTY);
+			FillCellsAroundShip(bitmap, currentShip, EMPTY, SIEVENUMBER);
+			FillCellsAroundShip(sieve, currentShip, EMPTY, SIEVENUMBER);
+
+			// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+			// // AFTER
+			// System.Console.WriteLine("AFTER");
+			// array2dToScreen(sieve);
+			// array2dToScreen(bitmap);
 
 			if (!playerTurn)
 			{
@@ -267,11 +319,11 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 			continue;
 		}
 
-		// Если корабль ранен
-
-
-		// void FillCellsAroundShip(int[,] map, int[] ship, int fillNumber)
-
+		// Если корабль ранен - уменьшаем счетчик действующих палуб. 
+		// DIRECTION - константа = 4, и в то же время номер живых палуб в массиве корабля. 
+		// Зря так сделано, но работает.
+		squadron[shipUnderFire][DIRECTIONS]--;
+	
 		FillCellsAroundWoundedDeckDiagonal(localX, localY, bitmap);
 		FillCellsAroundWoundedDeckDiagonal(localX, localY, sieve);
 
@@ -284,21 +336,14 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 
 
 // --------------- Get current ship parameter
-// Лучше просто перебором элементов корабля переделать
 int[] GetCurrentShip(int[][] squadron, int ship)
 {
-	int index = 0;
 	int shipArraySize = 5;
-	var currentShip = new int[shipArraySize];
+	int[] currentShip = new int[shipArraySize];
 
-	foreach (var item in squadron)
+	for (int i = 0; i < shipArraySize; i++)
 	{
-		if (index == ship)
-		{
-			currentShip = item;
-			break;
-		}
-		index++;
+		currentShip[i] = squadron[ship][i];
 	}
 	return currentShip;
 }
@@ -338,8 +383,10 @@ int FireResult(int[,] map, int localX, int localY)
 int GetCellToFire(int[,] sieve, int numberToFind, int count)
 {
 	int randomCellToFire = GetRandomFrom(1, count);
-	System.Console.Write("randomCellToFire ");
-	System.Console.WriteLine(randomCellToFire);
+
+	// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+	// System.Console.Write("randomCellToFire ");
+	// System.Console.WriteLine(randomCellToFire);
 
 	int xAnDyToFire = randomCellXY(randomCellToFire, sieve, numberToFind);
 
@@ -383,7 +430,7 @@ void PrintSymbolMap(int[,] computerMap, int[,] playerMap, bool hideShip)
 	System.Console.WriteLine();
 }
 
-// ------------------- Очистка основной карты мира от мусора
+// ------------------- Очистка карты от мусора
 void ChangeNumberIn2dArray(int[,] map, int findNumber, int changeNumber)
 {
 
@@ -633,7 +680,7 @@ void CreateMap(int[,] map, int[][] squadron)
 	foreach (int[] element in squadron)
 	{
 		ShipPlace(map, element, shipIndex);
-		FillCellsAroundShip(map, element, SIEVENUMBER);
+		FillCellsAroundShip(map, element, SIEVENUMBER, EMPTY);
 
 		shipIndex++;
 	}
@@ -663,7 +710,7 @@ void array2dBorder(int[,] arr2d, int number)
 }
 
 // --------------------------- fill cell around ship
-void FillCellsAroundShip(int[,] map, int[] ship, int fillNumber)
+void FillCellsAroundShip(int[,] map, int[] ship, int fillNumber, int numberToChange)
 {
 	int headDeckX = ship[0];
 	int headDeckY = ship[1];
@@ -679,11 +726,15 @@ void FillCellsAroundShip(int[,] map, int[] ship, int fillNumber)
 			for (int j = headDeckY - 1; j <= headDeckY + 1; j++)
 			{
 				// j - Y, i - X
-				if (map[j, i] == 0)
+				
+				if (map[j, i] == numberToChange)
 				{
 					map[j, i] = fillNumber;
 				}
+				
+					
 			}
+				
 		}
 		headDeckX = headDeckX + dX;
 		headDeckY = headDeckY + dY;

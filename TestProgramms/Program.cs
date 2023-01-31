@@ -94,7 +94,7 @@ while (true)
 {
 	PrintSymbolMap(computerWorld, playerWorld, HIDESHIP);
 
-	int stopGame = inputNumberPrompt("Generate new map? (1 - yes, 0 - no)");
+	int stopGame = inputNumberPrompt("Generate new PLAYER map? (1 - yes, 0 - no)\n-----------------------------------------------------------");
 
 	if (stopGame == 0)
 	{
@@ -149,6 +149,8 @@ while (true)
 	overalTurnCount++;
 
 	System.Console.WriteLine();
+	System.Console.WriteLine("======================================================");
+	System.Console.WriteLine();
 	System.Console.WriteLine($"TURN {overalTurnCount}");
 
 	if (playerTurn)
@@ -170,18 +172,18 @@ while (true)
 }
 
 System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 System.Console.WriteLine();
 Console.WriteLine((playerTurn) ? "                  PLAYER WIN" : "                COMPUTER  WIN");
 System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&   on  turn  &&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&   on turn   &&&&&&&&&&&&&&&&");
 System.Console.WriteLine();
 System.Console.Write("                      ");
 System.Console.WriteLine(overalTurnCount);
 System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 System.Console.WriteLine();
 PrintSymbolMap(computerWorld, playerWorld, HIDESHIP);
 // =====================================================================
@@ -402,7 +404,8 @@ int GetAndCountMax(int[,] map)
 // --------------------- Вывод символьных полей игрока и компьютера
 void PrintSymbolMap(int[,] computerMap, int[,] playerMap, bool hideShip)
 {
-	System.Console.WriteLine("   computerMap \t\t\t   playerMap");
+	System.Console.WriteLine();
+	System.Console.WriteLine("         computer Map \t\t\t player Map");
 	System.Console.WriteLine();
 	System.Console.WriteLine("     1 2 3 4 5 6 7 8 9 10 \t     1 2 3 4 5 6 7 8 9 10");
 
@@ -584,9 +587,7 @@ void array2dFillWithNumber(int[,] arr2d, int number)
 		{
 			arr2d[i, j] = number;
 		}
-		System.Console.WriteLine();
 	}
-	System.Console.WriteLine();
 }
 
 // -------------------- Функция генерации нового решета
@@ -684,7 +685,10 @@ void CreateMap(int[,] map, int[][] squadron)
 
 		shipIndex++;
 	}
-	System.Console.WriteLine("All ships placed on map");
+	
+	// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+	// System.Console.WriteLine("All ships placed on map");
+
 	ChangeNumberIn2dArray(map, SIEVENUMBER, EMPTY);
 }
 
@@ -810,8 +814,10 @@ void ShipPlace(int[,] map, int[] ship, int shipIndex)
 	while (emptyCells > 0)
 	{
 		int randomCell = GetRandomFrom(1, emptyCells);
-		System.Console.Write("randomCell ");
-		System.Console.WriteLine(randomCell);
+
+		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+		// System.Console.Write("randomCell ");
+		// System.Console.WriteLine(randomCell);
 
 		int xAnDy = randomCellXY(randomCell, map, EMPTY);
 
@@ -849,8 +855,10 @@ void ShipPlace(int[,] map, int[] ship, int shipIndex)
 				map[tailY, tailX] == 0
 				)
 			{
-				System.Console.WriteLine("Ship on map");
-				System.Console.WriteLine();
+				// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+				// System.Console.WriteLine("Ship on map");
+				// System.Console.WriteLine();
+
 				ship[0] = localX;
 				ship[1] = localY;
 				ship[2] = item;
@@ -859,7 +867,8 @@ void ShipPlace(int[,] map, int[] ship, int shipIndex)
 				return;
 			}
 
-			System.Console.WriteLine("Ship cannot placed on map. New place need to find");
+			// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
+			// System.Console.WriteLine("Ship cannot placed on map. New place need to find");
 			continue;
 
 		}

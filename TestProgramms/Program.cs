@@ -168,23 +168,22 @@ while (true)
 		break;
 	}
 
-	
+
 }
 
 System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+System.Console.WriteLine("&&&&&&&                                            &&&&&&&");
+Console.WriteLine((playerTurn) ?
+						 "                        PLAYER WIN" : "                       COMPUTER WIN");
 System.Console.WriteLine();
-Console.WriteLine((playerTurn) ? "                  PLAYER WIN" : "                COMPUTER  WIN");
+System.Console.WriteLine("&&&&&&&&&&&&&&           on  turn           &&&&&&&&&&&&&&");
 System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&   on turn   &&&&&&&&&&&&&&&&");
-System.Console.WriteLine();
-System.Console.Write("                      ");
+System.Console.Write("                            ");
 System.Console.WriteLine(overalTurnCount);
-System.Console.WriteLine();
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-System.Console.WriteLine();
+System.Console.WriteLine("&&&&&&&                                            &&&&&&&");
+System.Console.WriteLine("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+
 PrintSymbolMap(computerWorld, playerWorld, HIDESHIP);
 // =====================================================================
 // ====================  END of MAIN LOOP  =============================
@@ -201,7 +200,7 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 		// Вывод игрового поля !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		System.Console.WriteLine();
 		System.Console.WriteLine("------------------------------------------------------");
-		
+
 		// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
 		// array2dToScreen(sieve);
 		// array2dToScreen(bitmap);
@@ -325,7 +324,7 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 		// DIRECTION - константа = 4, и в то же время номер живых палуб в массиве корабля. 
 		// Зря так сделано, но работает.
 		squadron[shipUnderFire][DIRECTIONS]--;
-	
+
 		FillCellsAroundWoundedDeckDiagonal(localX, localY, bitmap);
 		FillCellsAroundWoundedDeckDiagonal(localX, localY, sieve);
 
@@ -685,7 +684,7 @@ void CreateMap(int[,] map, int[][] squadron)
 
 		shipIndex++;
 	}
-	
+
 	// +++++++++++++++++++ Отладочная информация +++++++++++++++++++++++
 	// System.Console.WriteLine("All ships placed on map");
 
@@ -730,15 +729,15 @@ void FillCellsAroundShip(int[,] map, int[] ship, int fillNumber, int numberToCha
 			for (int j = headDeckY - 1; j <= headDeckY + 1; j++)
 			{
 				// j - Y, i - X
-				
+
 				if (map[j, i] == numberToChange)
 				{
 					map[j, i] = fillNumber;
 				}
-				
-					
+
+
 			}
-				
+
 		}
 		headDeckX = headDeckX + dX;
 		headDeckY = headDeckY + dY;

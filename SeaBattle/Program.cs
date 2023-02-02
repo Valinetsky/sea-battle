@@ -229,7 +229,7 @@ void MainPlay(int[,] map, int[,] sieve, int[,] bitmap, int[][] squadron, int tur
 			break;
 		}
 		// Есть ПРОБИТИЕ!!!
-		System.Console.WriteLine("   Есть ПРОБИТИЕ!!! * HIT!!!");
+		System.Console.WriteLine("    Есть ПРОБИТИЕ!!! * HIT!!!");
 
 		// узнаем статус корабля, в который попали
 		int shipUnderFire = shootResult - shipShift;

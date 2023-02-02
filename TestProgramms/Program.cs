@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 
 
-int TESTCOUNT = 100;
+int TESTCOUNT = 250;
 
 int PLAYERWIN = 0;
 
